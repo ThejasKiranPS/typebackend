@@ -3,14 +3,18 @@ const app = express()
 
 const http = require('http')
 const server = http.createServer(app)
-const {Server} = require('socket.io')
-const io = new Server(server)
+const io = require('socket.io')(server, {
+    cors: {
+        origin: '*'
+    }
+})
+
 const uid = require('uniqid')
 const cors = require('cors')
 
 app.use(express.json())
 app.use(cors)
-const users = []
+let users = []
 
 app.get('/', (req, res) => {
     res.send('hey there')
@@ -73,14 +77,18 @@ io.on('connection', (socket) => {
         }
     })
     socket.on('progress', (progress) => {
-        console.log(progress, users)
         for(let i = 0; i<users.length; i++) {
             if (users[i].id === socket.id) {
                 users[i].progress = progress
+                sortUsers()
                 io.emit('progress', users)
+                
             }
         }
     })
 })
+const sortUsers = () => {
+    users = users.sort((a, b) => a.progress>b.progress)
+}
 
 server.listen(3001, () => {console.log('server started')})

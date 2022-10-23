@@ -1,19 +1,12 @@
 const express = require('express')
+const { createServer } = require('http')
+const { Server } = require('socket.io')
+
 const app = express()
-
-const http = require('http')
-const server = http.createServer(app)
-const io = require('socket.io')(server, {
-    cors: {
-        origin: '*'
-    }
-})
-
-const uid = require('uniqid')
-const cors = require('cors')
+const httpServer = createServer(app)
+const io = new Server(httpServer, {});
 
 app.use(express.json())
-app.use(cors)
 let users = []
 
 app.get('/', (req, res) => {
@@ -91,4 +84,4 @@ const sortUsers = () => {
     users = users.sort((a, b) => a.progress>b.progress)
 }
 
-server.listen(3001, () => {console.log('server started')})
+httpServer.listen(3001, () => {console.log('server started')})
